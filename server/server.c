@@ -14,7 +14,8 @@
 
 typedef enum RoomState {
     EMPTY,
-    WAITING,
+    WAITING_FRIEND,
+    WAITING_ANYONE,
     PLAYING
 }RoomState;
 
@@ -58,12 +59,12 @@ void prepare_shared_memory(int *shm_id, Room **rooms);
 void init_room(Room *room);
 Room *attach_rooms(int shm_id);
 void detach_rooms(Room *rooms);
-Room get_room_and_lock(Room *rooms, int room_id);
+Room *get_room_and_lock(Room *rooms, int room_id);
 void unlock_room(int room_id);
 int prepare_socket(socklen_t *sin_siz);
-void reciever(int new_sockfd, int shm_id);
-int room_making(int shm_id);
-int room_searching(int room_id);
+void receiver(int new_sockfd, int shm_id);
+int room_making(int shm_id, int new_sockfd);
+int room_searching(int shm_id, int room_id, int new_sockfd);
 
 // グローバル
 Skill skills[5];
@@ -96,12 +97,14 @@ int main() {
 
             case 0: // 子プロセス
                 printf("connect from %s: %d\n", inet_ntoa(clnt.sin_addr), ntohs(clnt.sin_port));
-                reciever(new_sockfd, shm_id);
-                close(new_sockfd);
+                receiver(new_sockfd, shm_id);
+                //todo close
+                //close(new_sockfd);
                 exit(0);
 
             default: // 親プロセス
-                close(new_sockfd);
+                //todo close
+                //close(new_sockfd);
                 break;
         }
     }
@@ -198,8 +201,8 @@ void detach_rooms(Room *rooms) {
     }
 }
 
-Room get_room_and_lock(Room *rooms, int room_id) {
-    if (room_id < 0 || room_id >= NUM_OF_ROOMS) {
+Room *get_room_and_lock(Room *rooms, int room_id) {
+    if (room_id < 0 || room_id >= NUM_OF_ROOM) {
 //todo 終了処理
         fprintf(stderr, "Invalid room_id: %d\n", room_id);
         exit(1);
@@ -211,26 +214,16 @@ Room get_room_and_lock(Room *rooms, int room_id) {
 
         if (lock_status == 0) {
             break;
-        } else if (lock_status == EINVAL) {
-//todo 終了処理
-            fprintf(stderr, "Mutex is not initialized for room_id: %d\n", room_id);
-            exit(1);
-        } else if (lock_status == EDEADLK) {
-            fprintf(stderr, "Deadlock detected for room_id: %d\n", room_id);
-            exit(1);
-        } else {
-            perror("pthread_mutex_lock");
-            exit(1);
         }
     }
 
     // 該当する Room を返す
-    return rooms[room_id];
+    return &rooms[room_id];
 }
 
 
 void unlock_room(int room_id) {
-    if (room_id < 0 || room_id >= NUM_OF_ROOMS) {
+    if (room_id < 0 || room_id >= NUM_OF_ROOM) {
 //todo 終了処理
         fprintf(stderr, "Invalid room_id: %d\n", room_id);
         exit(1);
@@ -241,6 +234,7 @@ void unlock_room(int room_id) {
         exit(1);
     }
 }
+
 int prepare_socket(socklen_t *sin_siz) {
     int sockfd;
     struct sockaddr_in serv;
@@ -272,11 +266,10 @@ int prepare_socket(socklen_t *sin_siz) {
     return sockfd;
 }
 
-void reciever(int new_sockfd, int shm_id) {
+void receiver(int new_sockfd, int shm_id) {
     char buf[100];
     memset(buf, 0, sizeof(buf));
     int len = recv(new_sockfd, buf, BUFSIZ, 0);
-    printf("len: %d\n", len);
     buf[len] = '\0';
     printf("received: %s\n", buf);
 
@@ -284,44 +277,59 @@ void reciever(int new_sockfd, int shm_id) {
     char *label = strtok(buf, " ");
     char *data = strtok(NULL, " ");
 
-    printf("label: %s\n", label);
-    printf("data: %s\n", data);
-
     if(strcmp(label, "room_making") == 0) {
-        int room_id = room_making(shm_id);
+        int room_id = room_making(shm_id, new_sockfd);
         printf("room_id: %d\n", room_id);
-        send(new_sockfd, buf, strlen(buf), 0);
     }
     else if(strcmp(label, "room_searching") == 0) {
         int room_id = atoi(data);
-        room_searching(room_id);
+        room_searching(shm_id, room_id, new_sockfd);
     }
     else {
         printf("unknown label\n");
     }
 }
 
-int room_making(int shm_id) {
-    printf("room_making\n");
-
+int room_making(int shm_id, int new_sockfd) {
     Room *rooms = attach_rooms(shm_id);
     int room_id;
 
-    for (int i = 0; i < NUM_OF_ROOM; i++) {
-        if (rooms[i].state == EMPTY) {
-            rooms[i].state = WAITING;
+    for (int i = 1; i < NUM_OF_ROOM; i++) {
+        Room *room = get_room_and_lock(rooms, i);
+        if (room->state == EMPTY) {
+            printf("room_making %d\n", i);
+            room->state = WAITING_FRIEND;
+            room->players[0].sockfd = new_sockfd;
             room_id = i;
+            printf("room_id: %d\n", room_id);
+            char *buf;
+            sprintf(buf, "room_id %d", room_id);
+            send(room->players[0].sockfd, buf, 8, 0);
+            unlock_room(i);
             break;
         }
+        unlock_room(i);
     }
-
     detach_rooms(rooms);
     return room_id;
 }
 
-int room_searching(int room_id) {
+int room_searching(int shm_id, int room_id, int new_sockfd) {
     printf("room_searching %d\n", room_id);
-    return 1;
+    Room *rooms = attach_rooms(shm_id);
+    Room *room = get_room_and_lock(rooms, room_id);
+    if(room->state == WAITING_FRIEND) {
+        room->state = PLAYING;
+        room->players[1].sockfd = new_sockfd;
+        send(room->players[0].sockfd, "start", 5, 0);
+        send(room->players[1].sockfd, "start", 5, 0);
+        unlock_room(room_id);
+        return 1;
+    }
+    else {
+        unlock_room(room_id);
+        return -1;
+    }
 }
 
 

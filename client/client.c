@@ -5,6 +5,7 @@
 #include <conio.h> // キーボードからEnter無しでの入力用
 
 #include <winsock2.h> // Windows用ソケット リンクには -lws2_32 が必要
+//gcc -o client client.c -lws2_32
 
 WSADATA initialize();
 void finalize();
@@ -14,8 +15,9 @@ void output_with_friend_menu();
 
 void handle_with_friend_menu();
 
-int request_room_making();
-void request_room_searching(int n);
+int request_room_making(int sockfd);
+void waiting_battle(int sockfd, int room_id);
+void request_room_searching(int sockfd, int n);
 
 int prepare_socket();
 
@@ -90,8 +92,10 @@ void handle_with_friend_menu() {
     printf("n = %d\n", n);
     int room_id;
     if(n == 0) {
-        printf("room making\n");
-        room_id = request_room_making();
+        int sockfd = prepare_socket();
+        room_id = request_room_making(sockfd);
+        printf("room_id = %d\n", room_id);
+        waiting_battle(sockfd, room_id);
     }
     else if(n < 0) {
         printf("exit\n");
@@ -100,24 +104,62 @@ void handle_with_friend_menu() {
     else {
         printf("searching %d room\n", n);
         room_id = n;
-        request_room_searching(n);
+        int sockfd = prepare_socket();
+        request_room_searching(sockfd, n);
     }
 }
 
-int request_room_making() {
-    int sockfd = prepare_socket();
-    char *buf = "room_making 0\0";
+int request_room_making(int sockfd) {
+    printf("request room making\n");
+    char buf[30];
+    sprintf(buf, "room_making 0\0");
     int len;
     send(sockfd, buf, strlen(buf), 0);
-    len = recv(sockfd, buf, len, 0);
+    len = recv(sockfd, buf, 30, 0);
+    if(len == 0) {
+        printf("connection closed\n");
+        finalize();
+    }
     buf[len] = '\0';
-    closesocket(sockfd);
-    int room_id = atoi(buf);
+    printf("rbuf: %s\n", buf);
+    //buf: room_id [room_id]
+    char *label = strtok(buf, " ");
+    char *data = strtok(NULL, " ");
+    int room_id = atoi(data);
     return room_id;
 }
 
-void request_room_searching(int n) {
+void waiting_battle(int sockfd, int room_id) {
+    printf("waiting battle\n");
+    char buf[30];
+    while(1) {
+        int len = recv(sockfd, buf, 30, 0);
+        buf[len] = '\0';
+        printf("buf: %s\n", buf);
+        if(len == 0) {
+            printf("connection closed:: waiting_battle\n");
+            finalize();
+        }
+        if(strcmp(buf, "start") == 0) {
+            printf("battle start\n");
+            return;
+        }
+    }
+}
 
+void request_room_searching(int sockfd, int n) {
+    char *buf;
+    sprintf(buf, "room_searching %d\0", n);
+    int len;
+    send(sockfd, buf, strlen(buf), 0);
+    len = recv(sockfd, buf, len, 0);
+    if(len == 0) {
+        printf("connection closed\n");
+        finalize();
+    }
+    buf[len] = '\0';
+
+    //todo buf
 }
 
 int prepare_socket() {
