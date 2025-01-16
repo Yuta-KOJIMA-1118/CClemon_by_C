@@ -16,6 +16,7 @@ void prepare_shared_memory(int *shm_id, Room **rooms) {
 }
 
 void init_room(Room *room) {
+    //todo mutexを実装する
     room->state = EMPTY;
     for(int i=0; i<2; i++) {
         room->players[i].name[0] = '\0';

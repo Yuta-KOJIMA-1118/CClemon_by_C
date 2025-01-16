@@ -46,6 +46,12 @@ typedef struct Room {
     Player players[2];
 } Room;
 
+typedef struct Battle {
+    int room_id;
+    int player_num;
+    int shm_id;
+} Battle;
+
 extern Skill skills[5];
 extern pthread_mutex_t room_mutexes[NUM_OF_ROOM];
 
@@ -63,5 +69,8 @@ int prepare_socket(socklen_t *sin_siz);
 void receiver(int new_sockfd, int shm_id);
 int room_making(int shm_id, int new_sockfd);
 int room_searching(int shm_id, int room_id, int new_sockfd);
+void battle_receiver(int room_id, int player_num, int shm_id);
+void *pthread_battle_receiver(void *arg);
+void battle(int room_id, int shm_id);
 
 #endif // SERVER_H

@@ -60,3 +60,62 @@ void receiver(int new_sockfd, int shm_id) {
         printf("unknown label\n");
     }
 }
+
+void battle_receiver(int room_id, int player_num, int shm_id) {
+    // 1.4s per turn
+    char buf[30];
+    Room *rooms = attach_rooms(shm_id);
+
+    while(1) {
+        struct timeval tv;
+        tv.tv_sec = 1;
+        tv.tv_usec = 400000;
+
+        fd_set read_fds;
+        FD_ZERO(&read_fds);
+        FD_SET(rooms[room_id].players[player_num].sockfd, &read_fds);
+
+        int ret = select(rooms[room_id].players[player_num].sockfd + 1, &read_fds, NULL, NULL, &tv);
+        if(ret == -1) {
+            perror("select");
+            exit(1);
+        }
+        else if(ret == 0) {
+            printf("timeout\n");
+            Room *room = get_room_and_lock(rooms, room_id);
+            room->players[player_num].next_skill = skills[0]; // lemon
+            unlock_room(room_id);
+            return;
+        }
+
+        if(FD_ISSET(rooms[room_id].players[player_num].sockfd, &read_fds)) {
+            int len = recv(rooms[room_id].players[player_num].sockfd, buf, 30, 0);
+            if(len == 0) {
+                //todo close
+                printf("connection closed:: battle_receiver\n");
+                exit(1);
+            }
+            buf[len] = '\0';
+            printf("received: %s\n", buf);
+            char *label = strtok(buf, " ");
+            char *data = strtok(NULL, " ");
+
+            if(strcmp(label, "skill") == 0) {
+                int skill_id = atoi(data);
+                Room *room = get_room_and_lock(rooms, room_id);
+                room->players[player_num].next_skill = skills[skill_id];
+                unlock_room(room_id);
+            }
+            else {
+                printf("unknown label\n");
+            }
+            break;
+        }
+
+    }
+}
+
+void *pthread_battle_receiver(void *arg) {
+    Battle *battle = (Battle *)arg;
+    battle_receiver(battle->room_id, battle->player_num, battle->shm_id);
+}

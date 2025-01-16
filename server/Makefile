@@ -8,7 +8,7 @@ CFLAGS = -Wall -Wextra -g -pthread
 TARGET = server
 
 # ソースファイルのリスト
-SRCS = server.c skills.c room.c network.c room_actions.c
+SRCS = server.c skills.c room.c network.c room_actions.c battle.c
 
 # オブジェクトファイルのリスト
 OBJS = $(SRCS:.c=.o)

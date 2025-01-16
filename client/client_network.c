@@ -33,6 +33,7 @@ void waiting_battle(int sockfd, int room_id) {
         }
         if(strcmp(buf, "start") == 0) {
             printf("battle start\n");
+            start_battle(sockfd);
             return;
         }
     }
