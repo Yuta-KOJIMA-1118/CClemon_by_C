@@ -22,7 +22,6 @@ void output_with_friend_menu() {
 void handle_with_friend_menu() {
     int n;
     scanf("%d", &n);
-    printf("n = %d\n", n);
     int room_id;
     if(n == 0) {
         int sockfd = prepare_socket();
@@ -38,6 +37,12 @@ void handle_with_friend_menu() {
         printf("searching %d room\n", n);
         room_id = n;
         int sockfd = prepare_socket();
-        request_room_searching(sockfd, n);
+        if(request_room_searching(sockfd, n)) {
+            start_battle(sockfd);
+        }
+        else {
+            printf("failed to start battle\n");
+            return;
+        }
     }
 }

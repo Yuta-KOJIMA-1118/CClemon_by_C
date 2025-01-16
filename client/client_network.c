@@ -39,7 +39,7 @@ void waiting_battle(int sockfd, int room_id) {
 }
 
 
-void request_room_searching(int sockfd, int n) {
+int request_room_searching(int sockfd, int n) {
     char *buf;
     sprintf(buf, "room_searching %d\0", n);
     int len;
@@ -50,8 +50,14 @@ void request_room_searching(int sockfd, int n) {
         finalize();
     }
     buf[len] = '\0';
-
-    //todo buf
+    printf("buf: %s\n", buf);
+    if(strcmp(buf, "start") == 0) {
+        printf("battle start\n");
+        return 1;
+    }
+    else {
+        return -1;
+    }
 }
 
 

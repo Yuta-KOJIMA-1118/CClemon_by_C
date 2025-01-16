@@ -16,9 +16,11 @@ void handle_with_friend_menu();
 
 int request_room_making(int sockfd);
 void waiting_battle(int sockfd, int room_id);
-void request_room_searching(int sockfd, int n);
+int request_room_searching(int sockfd, int n);
 
 int prepare_socket();
+
+void start_battle(int sockfd);
 
 #endif // CLIENT_H
 
