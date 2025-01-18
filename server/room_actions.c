@@ -14,7 +14,7 @@ int room_making(int shm_id, int new_sockfd) {
             printf("room_id: %d\n", room_id);
             char buf[30];
             sprintf(buf, "room_id %d", room_id);
-            printf("send:buf: %s\n", buf);
+            printf("send from room_making:%s\n", buf);
             send(room->players[0].sockfd, buf, 30, 0);
             unlock_room(i);
             break;

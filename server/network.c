@@ -42,17 +42,18 @@ void receiver(int new_sockfd, int shm_id) {
 
 
     buf[len] = '\0';
-    printf("received: %s\n", buf);
+    printf("received in receiver: %s\n", buf);
 
     // buf: [label] [data]
     char *label = strtok(buf, " ");
     char *data = strtok(NULL, " ");
 
     if(strcmp(label, "room_making") == 0) {
-        int room_id = room_making(shm_id, new_sockfd);
-        printf("room_id: %d\n", room_id);
+        printf("room_making\n");
+        room_making(shm_id, new_sockfd);
     }
     else if(strcmp(label, "room_searching") == 0) {
+        printf("room_searching\n");
         int room_id = atoi(data);
         room_searching(shm_id, room_id, new_sockfd);
     }
@@ -96,7 +97,7 @@ void battle_receiver(int room_id, int player_num, int shm_id) {
                 exit(1);
             }
             buf[len] = '\0';
-            printf("received: %s\n", buf);
+            printf("received in battle_receiver: %s\n", buf);
             char *label = strtok(buf, " ");
             char *data = strtok(NULL, " ");
 
@@ -118,4 +119,5 @@ void battle_receiver(int room_id, int player_num, int shm_id) {
 void *pthread_battle_receiver(void *arg) {
     Battle *battle = (Battle *)arg;
     battle_receiver(battle->room_id, battle->player_num, battle->shm_id);
+    return NULL;
 }

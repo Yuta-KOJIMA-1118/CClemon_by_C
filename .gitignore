@@ -4,3 +4,6 @@
 
 # /server/server
 server
+
+# /client/client
+client

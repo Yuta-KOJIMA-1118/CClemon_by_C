@@ -1,6 +1,7 @@
 #include "client.h"
 
 void start_battle(int sockfd) {
+    printf("start_battle\n");
     while(1) {
         if(_kbhit()) {
             char c = _getch();

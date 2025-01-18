@@ -41,23 +41,25 @@ void waiting_battle(int sockfd, int room_id) {
 
 
 int request_room_searching(int sockfd, int n) {
-    char *buf;
-    sprintf(buf, "room_searching %d\0", n);
+    printf("request room searching\n");
+    char buf[30];
+    sprintf(buf, "room_searching %d", n);
     int len;
-    send(sockfd, buf, strlen(buf), 0);
-    len = recv(sockfd, buf, len, 0);
+    printf("send: %s\n", buf);
+    send(sockfd, buf, 30, 0);
+    len = recv(sockfd, buf, 30, 0);
     if(len == 0) {
         printf("connection closed\n");
         finalize();
     }
     buf[len] = '\0';
-    printf("buf: %s\n", buf);
+    printf("recv in request_room_searching: %s\n", buf);
     if(strcmp(buf, "start") == 0) {
         printf("battle start\n");
         return 1;
     }
     else {
-        return -1;
+        return 0;
     }
 }
 
