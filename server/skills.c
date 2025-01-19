@@ -1,28 +1,28 @@
 #include "server.h"
 
 void prepare_skills() {
-    strcpy(skills[0].name, "lemon");
-    skills[0].priority = 0;
-    skills[0].energy = -1;
-    skills[0].type = CHARGE;
+    strcpy(skills[LEMON].name, "lemon");
+    skills[LEMON].priority = 0;
+    skills[LEMON].energy = -1;
+    skills[LEMON].type = CHARGE;
 
-    strcpy(skills[1].name, "fire");
-    skills[1].priority = 1;
-    skills[1].energy = 3;
-    skills[1].type = ATTACK;
+    strcpy(skills[FIRE].name, "fire");
+    skills[FIRE].priority = 1;
+    skills[FIRE].energy = 3;
+    skills[FIRE].type = ATTACK;
 
-    strcpy(skills[2].name, "barrier");
-    skills[2].priority = 2;
-    skills[2].energy = 0;
-    skills[2].type = DEFENCE;
+    strcpy(skills[BARRIER].name, "barrier");
+    skills[BARRIER].priority = 2;
+    skills[BARRIER].energy = 0;
+    skills[BARRIER].type = DEFENCE;
 
-    strcpy(skills[3].name, "change");
-    skills[3].priority = 3;
-    skills[3].energy = 1;
-    skills[3].type = REFLECT;
+    strcpy(skills[CHANGE].name, "change");
+    skills[CHANGE].priority = 3;
+    skills[CHANGE].energy = 1;
+    skills[CHANGE].type = REFLECT;
 
-    strcpy(skills[4].name, "gun");
-    skills[4].priority = 4;
-    skills[4].energy = 5;
-    skills[4].type = ATTACK;
+    strcpy(skills[GUN].name, "gun");
+    skills[GUN].priority = 4;
+    skills[GUN].energy = 5;
+    skills[GUN].type = ATTACK;
 }

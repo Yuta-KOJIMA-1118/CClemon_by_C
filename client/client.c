@@ -1,5 +1,8 @@
 #include "client.h"
 
+// グローバル変数
+Skill skills[5];
+
 int main() {
     initialize();
     output_home();

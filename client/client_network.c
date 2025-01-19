@@ -93,3 +93,12 @@ int prepare_socket() {
 
     return sockfd;
 }
+
+
+void *pthread_battle_sender(void *arg) {
+
+}
+
+void *pthread_battle_receiver(void *arg) {
+
+}

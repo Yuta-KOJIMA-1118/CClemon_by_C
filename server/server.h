@@ -14,6 +14,12 @@
 
 #define NUM_OF_ROOM 1000
 
+#define LEMON 0
+#define FIRE 1
+#define BARRIER 2
+#define CHANGE 3
+#define GUN 4
+
 typedef enum RoomState {
     EMPTY,
     WAITING_FRIEND,
