@@ -100,5 +100,29 @@ void *pthread_battle_sender(void *arg) {
 }
 
 void *pthread_battle_receiver(void *arg) {
+    int sockfd = *(int *)arg;
+    char buf[30];
+    int len = recv(sockfd, buf, 30, 0);
+    if(len == 0) {
+        printf("connection closed:: pthread_battle_receiver\n");
+        finalize();
+    }
 
+    buf[len] = '\0';
+    printf("received in pthread_battle_receiver: %s\n", buf);
+    char *label = strtok(buf, " ");
+    char *e_skill = strtok(NULL, " ");
+    char *e_lemon = strtok(NULL, " ");
+    char *y_skill = strtok(NULL, " ");
+    char *y_lemon = strtok(NULL, " ");
+    char *winner = strtok(NULL, " ");
+
+    BattleRcvData *data = (BattleRcvData *)malloc(sizeof(BattleRcvData));
+    data->e_skill = atoi(e_skill);
+    data->e_lemon = atoi(e_lemon);
+    data->y_skill = atoi(y_skill);
+    data->y_lemon = atoi(y_lemon);
+    data->winner = atoi(winner);
+
+    return (void *)data;
 }

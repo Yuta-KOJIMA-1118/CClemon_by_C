@@ -47,7 +47,7 @@ void handle_with_friend_menu() {
     }
 }
 
-void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int p_prev_skill, int turn) {
+void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int p_prev_skill, int turn, int selected_skill, int mistake) {
     system("cls");
     printf("battle\n");
     printf("\n");
@@ -89,3 +89,80 @@ void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
     printf("4. gun\n");
     printf("\n");
 }
+
+void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int y_prev_skill, int turn, int *selected_skill) {
+    const int interval_ms = 350;
+    const int timeout_ms = 700;
+    unsigned long start_time = GetTickCount();
+    int mistake = 0;
+
+    while((GetTickCount() - start_time) < timeout_ms) {
+        int input_received = 0;
+        int cycle_start_time = GetTickCount();
+        // todo check num of lemon
+        while((GetTickCount() - cycle_start_time) < interval_ms) {
+            if(_kbhit()) {
+                char c = _getch();
+                switch(c) {
+                    case '0':
+                        *selected_skill = LEMON;
+                        input_received = 1;
+                        if(*selected_skill != LEMON) {
+                            output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+                        }
+                        break;
+                    case '1':
+                        *selected_skill = FIRE;
+                        input_received = 1;
+                        if(y_lemon < skills[FIRE].energy && mistake == 0) {
+                            mistake = 1;
+                            *selected_skill = LEMON;
+                            output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+                        }
+                        else if(*selected_skill != FIRE) {
+                            output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+                        }
+                        break;
+                    case '2':
+                        *selected_skill = BARRIER;
+                        input_received = 1;
+                        if(*selected_skill != BARRIER) {
+                            output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+                        }
+                        break;
+                    case '3':
+                        *selected_skill = CHANGE;
+                        input_received = 1;
+                        if(y_lemon < skills[CHANGE].energy && mistake == 0) {
+                            mistake = 1;
+                            *selected_skill = LEMON;
+                            output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+                        }
+                        else if(*selected_skill != CHANGE) {
+                            output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+                        }
+                        break;
+                    case '4':
+                        *selected_skill = GUN;
+                        input_received = 1;
+                        if(y_lemon < skills[GUN].energy && mistake == 0) {
+                            mistake = 1;
+                            *selected_skill = LEMON;
+                            output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+                        }
+                        else if(*selected_skill != GUN) {
+                            output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+                        }
+                        break;
+                    default:
+                        printf("invalid input\n");
+                        break;
+                }
+
+            }
+        }
+        turn++;
+        output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
+    }
+}
+

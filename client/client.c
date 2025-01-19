@@ -5,6 +5,7 @@ Skill skills[5];
 
 int main() {
     initialize();
+    prepare_skills();
     output_home();
     while(1) {
         if(_kbhit()) {

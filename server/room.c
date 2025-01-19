@@ -20,8 +20,7 @@ void init_room(Room *room) {
     room->state = EMPTY;
     for(int i=0; i<2; i++) {
         room->players[i].name[0] = '\0';
-        room->players[i].next_skill.name[0] = '\0';
-        room->players[i].next_skill = skills[0]; // lemon
+        room->players[i].next_skill = 0; // lemon
         if(room->players[i].sockfd != -1) {
             close(room->players[i].sockfd);
         }

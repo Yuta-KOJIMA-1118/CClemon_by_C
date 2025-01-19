@@ -63,14 +63,14 @@ void receiver(int new_sockfd, int shm_id) {
 }
 
 void battle_receiver(int room_id, int player_num, int shm_id) {
-    // 1.4s per turn
+    // 0.7s
     char buf[30];
     Room *rooms = attach_rooms(shm_id);
 
     while(1) {
         struct timeval tv;
-        tv.tv_sec = 1;
-        tv.tv_usec = 400000;
+        tv.tv_sec = 0;
+        tv.tv_usec = 700000;
 
         fd_set read_fds;
         FD_ZERO(&read_fds);
@@ -84,7 +84,7 @@ void battle_receiver(int room_id, int player_num, int shm_id) {
         else if(ret == 0) {
             printf("timeout\n");
             Room *room = get_room_and_lock(rooms, room_id);
-            room->players[player_num].next_skill = skills[0]; // lemon
+            room->players[player_num].next_skill = 0; // lemon
             unlock_room(room_id);
             return;
         }
@@ -104,7 +104,7 @@ void battle_receiver(int room_id, int player_num, int shm_id) {
             if(strcmp(label, "skill") == 0) {
                 int skill_id = atoi(data);
                 Room *room = get_room_and_lock(rooms, room_id);
-                room->players[player_num].next_skill = skills[skill_id];
+                room->players[player_num].next_skill = skill_id;
                 unlock_room(room_id);
             }
             else {

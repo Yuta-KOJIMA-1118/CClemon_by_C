@@ -36,14 +36,15 @@ typedef enum SkillType {
 
 typedef struct Skill {
     char name[10];
-    int priority;
+    int priority; //todo delete
     int energy;
     SkillType type;
 } Skill;
 
 typedef struct Player {
     char name[20];
-    Skill next_skill;
+    int next_skill;
+    int num_of_lemon;
     int sockfd;
 } Player;
 

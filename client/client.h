@@ -28,6 +28,14 @@ typedef struct Skill {
     SkillType type;
 } Skill;
 
+typedef struct BattleRcvData {
+    int e_skill;
+    int e_lemon;
+    int y_skill;
+    int y_lemon;
+    int winner;
+} BattleRcvData;
+
 extern Skill skills[5];
 
 WSADATA initialize();
@@ -36,7 +44,8 @@ void finalize();
 void output_home();
 void output_with_friend_menu();
 void handle_with_friend_menu();
-void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int p_prev_skill, int turn);
+void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int p_prev_skill, int turn, int selected_skill, int mistake);
+void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int y_prev_skill, int turn, int *selected_skill);
 
 int request_room_making(int sockfd);
 void waiting_battle(int sockfd, int room_id);
@@ -47,6 +56,8 @@ void *pthread_battle_receiver(void *arg);
 int prepare_socket();
 
 void start_battle(int sockfd);
+
+void prepare_skills();
 
 #endif // CLIENT_H
 

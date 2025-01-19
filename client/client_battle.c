@@ -1,6 +1,17 @@
 #include "client.h"
 
 void start_battle(int sockfd) {
+    system("cls");
+    // 3s 待つ
+    printf("3...\n");
+    Sleep(1000);
+    printf("2...\n");
+    Sleep(1000);
+    printf("1...\n");
+    Sleep(1000);
+
+    send(sockfd, "start", 5, 0);
+
     printf("start_battle\n");
     int turn = 0;
     int e_lemon = -1;
@@ -9,6 +20,7 @@ void start_battle(int sockfd) {
     int y_skill = -1;
     int e_prev_skill = -1;
     int y_prev_skill = -1;
+    int selected_skill = 0;
 
     while(1) {
         int len;
@@ -18,40 +30,32 @@ void start_battle(int sockfd) {
             printf("connection closed:: start_battle\n");
             finalize();
         }
+        buf[len] = '\0';
+        if(strcmp(buf, "turn start") != 0) {
+            printf("invalid turn start signal\n");
+            finalize();
+        }
     
-        pthread_t thread[2];
-        if(pthread_create(&thread[0], NULL, pthread_battle_sender, (void *)&sockfd) != 0) {
-            perror("pthread_create");
-            exit(1);
-        }
-        if(pthread_create(&thread[1], NULL, pthread_battle_receiver, (void *)&sockfd) != 0) {
+        pthread_t thread;
+        if(pthread_create(&thread, NULL, pthread_battle_receiver, (void *)&sockfd) != 0) {
             perror("pthread_create");
             exit(1);
         }
 
-        // turn 0
-        output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn);
-        // 0.35s
-        Sleep(350);
+        // handle_battle_menuで0.7s待つ
+        output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, selected_skill, 0);
+        handle_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, &selected_skill);
 
-        // turn 1
-        turn++;
-        output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn);
-        // 0.35s
-        Sleep(350);
-
-        for(int i=0; i<2; i++) {
-            if(pthread_join(thread[i], NULL) != 0) {
-                perror("pthread_join");
-                exit(1);
-            }
+        BattleRcvData data;
+        if(pthread_join(thread, (void *)&data) != 0) {
+            perror("pthread_join");
+            exit(1);
         }
 
         //todo バトル処理
-
     }
 
-    
+
 
 
 }
