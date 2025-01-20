@@ -23,10 +23,8 @@ void init_room(int room_id, int shm_id) {
     for(int i=0; i<2; i++) {
         room->players[i].name[0] = '\0';
         room->players[i].next_skill = 0; // lemon
-        if(room->players[i].sockfd != -1) {
-            close(room->players[i].sockfd);
-        }
-        room->players[i].sockfd = -1;
+        close(room->players[i].sockfd);
+        room->players[i].sockfd = -2; // -2: no player, -1: player left
     }
     unlock_room(room_id);
 }
@@ -96,3 +94,41 @@ void unlock_room(int room_id) {
         exit(1);
     }
 }
+
+RoomState get_room_state_no_lock(Room *rooms, int room_id) {
+    if (room_id < 0 || room_id >= NUM_OF_ROOM) {
+        fprintf(stderr, "Invalid room_id: %d\n", room_id);
+        exit(1);
+    }
+
+    Room *room = &rooms[room_id];
+    return room->state;
+}
+
+void check_room_sockfd(Room *rooms, int room_id, int shm_id) {
+    printf("check_room_sockfd %d\n", room_id);
+    int flag = 0;
+    Room *room = get_room_and_lock(rooms, room_id);
+    for(int i=0; i<2; i++) {
+        // 実際に通信をしてsockfdが有効かを確認
+        if(room->players[i].sockfd != -2) {
+            struct pollfd pfd;
+            pfd.fd = room->players[i].sockfd;
+            pfd.events = POLLIN | POLLPRI;
+            
+            int ret = poll(&pfd, 1, 0); // 0: timeout, 1: data available, -1: error
+            if(ret == -1 || pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {
+                flag = 1;
+                break;
+            }
+        }
+    }
+    unlock_room(room_id);
+
+    if(flag == 1) {
+        init_room(room_id, shm_id);
+    }
+    printf("check_room_sockfd end\n");
+
+}
+

@@ -11,6 +11,10 @@ int request_room_making(int sockfd) {
         printf("connection closed\n");
         finalize();
     }
+    if(len == -1) {
+        perror("recv");
+        finalize();
+    }
     buf[len] = '\0';
     printf("recv in request_room_making: %s\n", buf);
     //buf: room_id [room_id]
@@ -31,9 +35,16 @@ void waiting_battle(int sockfd, int room_id) {
             printf("connection closed:: waiting_battle\n");
             finalize();
         }
+        if(len == -1) {
+            perror("recv");
+            finalize();
+        }
         if(strcmp(buf, "start") == 0) {
             printf("battle start\n");
             start_battle(sockfd);
+        }
+        else if(strcmp(buf, "failed") == 0) {
+            printf("failed to start battle\n");
             return;
         }
     }
@@ -50,6 +61,10 @@ int request_room_searching(int sockfd, int n) {
     len = recv(sockfd, buf, 30, 0);
     if(len == 0) {
         printf("connection closed\n");
+        finalize();
+    }
+    if(len == -1) {
+        perror("recv");
         finalize();
     }
     buf[len] = '\0';
@@ -94,17 +109,16 @@ int prepare_socket() {
     return sockfd;
 }
 
-
-void *pthread_battle_sender(void *arg) {
-
-}
-
 void *pthread_battle_receiver(void *arg) {
     int sockfd = *(int *)arg;
     char buf[30];
     int len = recv(sockfd, buf, 30, 0);
     if(len == 0) {
         printf("connection closed:: pthread_battle_receiver\n");
+        finalize();
+    }
+    if(len == -1) {
+        perror("recv");
         finalize();
     }
 

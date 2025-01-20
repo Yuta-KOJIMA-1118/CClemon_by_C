@@ -10,7 +10,15 @@ void start_battle(int sockfd) {
     printf("1...\n");
     Sleep(1000);
 
-    send(sockfd, "start", 30, 0);
+    int len = send(sockfd, "start", 30, 0);
+    if(len == -1) {
+        perror("send");
+        finalize();
+    }
+    if(len == 0) {
+        printf("connection closed:: start_battle\n");
+        finalize();
+    }
 
     printf("start_battle\n");
     int turn = 0;
@@ -48,7 +56,15 @@ void start_battle(int sockfd) {
 
         char buf_2[30];
         sprintf(buf_2, "skill %d", selected_skill);
-        send(sockfd, buf_2, 30, 0);
+        len = send(sockfd, buf_2, 30, 0);
+        if(len == -1) {
+            perror("send");
+            finalize();
+        }
+        if(len == 0) {
+            printf("connection closed:: start_battle\n");
+            finalize();
+        }
 
         BattleRcvData *data;
         if(pthread_join(thread, (void **)&data) != 0) {

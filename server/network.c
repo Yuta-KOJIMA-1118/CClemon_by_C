@@ -93,8 +93,8 @@ void battle_receiver(int room_id, int player_num, int shm_id) {
 
         if(FD_ISSET(rooms[room_id].players[player_num].sockfd, &read_fds)) {
             int len = recv(rooms[room_id].players[player_num].sockfd, buf, 30, 0);
-            if(len == 0) {
-                //todo close
+            if(len == 0 || len == -1) {
+                init_room(room_id, shm_id);
                 printf("connection closed:: battle_receiver\n");
                 exit(1);
             }

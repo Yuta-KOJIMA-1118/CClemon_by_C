@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <sys/shm.h>
 #include <sys/time.h>
+#include <poll.h>
 
 #define NUM_OF_ROOM 1000
 
@@ -72,6 +73,8 @@ void init_room(int room_id, int shm_id);
 Room *attach_rooms(int shm_id);
 void detach_rooms(Room *rooms);
 Room *get_room_and_lock(Room *rooms, int room_id);
+RoomState get_room_state_no_lock(Room *rooms, int room_id);
+void check_room_sockfd(Room *rooms, int room_id, int shm_id);
 void unlock_room(int room_id);
 int prepare_socket(socklen_t *sin_siz);
 void receiver(int new_sockfd, int shm_id);

@@ -69,12 +69,23 @@ void battle(int room_id, int shm_id) {
 
         // turn start signal
         printf("turn start signal\n");
-        send(sockfd[0], "turn start", 30, 0);
-        send(sockfd[1], "turn start", 30, 0);
+        int len_1 = send(sockfd[0], "turn start", 30, 0);
+        int len_2 = send(sockfd[1], "turn start", 30, 0);
+        if(len_1 == -1 || len_2 == -1) {
+            perror("send");
+            init_room(room_id, shm_id);
+            exit(1);
+        }
+        if(len_1 == 0 || len_2 == 0) {
+            printf("connection closed:: battle\n");
+            init_room(room_id, shm_id);
+            exit(1);
+        }
 
         for(int i=0; i<2; i++) {
             if(pthread_join(thread[i], NULL) != 0) {
                 perror("pthread_join");
+                init_room(room_id, shm_id);
                 exit(1);
             }
         }
@@ -157,8 +168,18 @@ void battle(int room_id, int shm_id) {
         unlock_room(room_id);
 
         printf("send %s\n",result_0);
-        send(sockfd[0], result_0, 30, 0);
-        send(sockfd[1], result_1, 30, 0);
+        len_1 = send(sockfd[0], result_0, 30, 0);
+        len_2 = send(sockfd[1], result_1, 30, 0);
+        if(len_1 == -1 || len_2 == -1) {
+            perror("send");
+            init_room(room_id, shm_id);
+            exit(1);
+        }
+        if(len_1 == 0 || len_2 == 0) {
+            printf("connection closed:: battle\n");
+            init_room(room_id, shm_id);
+            exit(1);
+        }
 
         if(who_win != -1) {
             break;
@@ -177,5 +198,4 @@ void battle(int room_id, int shm_id) {
     //todo close
     init_room(room_id, shm_id);
     exit(0);
-    
 }
