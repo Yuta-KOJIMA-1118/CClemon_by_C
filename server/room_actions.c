@@ -35,6 +35,7 @@ int room_searching(int shm_id, int room_id, int new_sockfd) {
         send(room->players[0].sockfd, "start", 5, 0);
         send(room->players[1].sockfd, "start", 5, 0);
         printf("start %d\n", room_id);
+        printf("players[0].sockfd: %d, players[1].sockfd: %d\n", room->players[0].sockfd, room->players[1].sockfd);
         unlock_room(room_id);
         detach_rooms(rooms);
         battle(room_id, shm_id);

@@ -12,7 +12,7 @@ int request_room_making(int sockfd) {
         finalize();
     }
     buf[len] = '\0';
-    printf("rbuf: %s\n", buf);
+    printf("recv in request_room_making: %s\n", buf);
     //buf: room_id [room_id]
     char *label = strtok(buf, " ");
     char *data = strtok(NULL, " ");
@@ -26,7 +26,7 @@ void waiting_battle(int sockfd, int room_id) {
     while(1) {
         int len = recv(sockfd, buf, 30, 0);
         buf[len] = '\0';
-        printf("buf: %s\n", buf);
+        printf("recv in waiting_battle: %s\n", buf);
         if(len == 0) {
             printf("connection closed:: waiting_battle\n");
             finalize();
@@ -123,6 +123,8 @@ void *pthread_battle_receiver(void *arg) {
     data->y_skill = atoi(y_skill);
     data->y_lemon = atoi(y_lemon);
     data->winner = atoi(winner);
+
+    printf("e_skill: %d, e_lemon: %d, y_skill: %d, y_lemon: %d, winner: %d\n", data->e_skill, data->e_lemon, data->y_skill, data->y_lemon, data->winner);
 
     return (void *)data;
 }

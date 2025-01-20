@@ -6,6 +6,7 @@ void battle(int room_id, int shm_id) {
     int sockfd[2];
     sockfd[0] = room->players[0].sockfd;
     sockfd[1] = room->players[1].sockfd;
+    printf("sockfd[0]: %d, sockfd[1]: %d\n", sockfd[0], sockfd[1]);
     unlock_room(room_id);
 
     char buf_1[30];
@@ -15,7 +16,12 @@ void battle(int room_id, int shm_id) {
 
     len_1 = recv(sockfd[0], buf_1, 30, 0);
     len_2 = recv(sockfd[1], buf_2, 30, 0);
-
+    if(len_1 == -1 || len_2 == -1 || len_1 == 0 || len_2 == 0) {
+        printf("sockfd[0]: %d, sockfd[1]: %d\n", sockfd[0], sockfd[1]);
+        perror("recv");
+        init_room(room_id, shm_id);
+        exit(1);
+    }
     printf("received in battle: %s, %s\n", buf_1, buf_2);
 
     if(len_1 == 0 || len_2 == 0) {
@@ -29,7 +35,7 @@ void battle(int room_id, int shm_id) {
 
     if(strcmp(buf_1, "start") != 0 || strcmp(buf_2, "start") != 0) {
         printf("invalid start signal\n");
-        //todo close
+        init_room(room_id, shm_id);
         exit(1);
     }
 
@@ -49,6 +55,10 @@ void battle(int room_id, int shm_id) {
         battle[1].room_id = room_id;
         battle[1].player_num = 1;
         battle[1].shm_id = shm_id;
+        
+        //現在時刻
+        struct timeval start_tv;
+        gettimeofday(&start_tv, NULL);
 
         for(int i=0; i<2; i++) {
             if(pthread_create(&thread[i], NULL, pthread_battle_receiver, (void *)&battle[i]) != 0) {
@@ -68,7 +78,7 @@ void battle(int room_id, int shm_id) {
                 exit(1);
             }
         }
-        // ここまでで0.7s
+        // ここまでで1.0s
 
         //バトル処理
         Room *room = get_room_and_lock(rooms, room_id);
@@ -116,14 +126,14 @@ void battle(int room_id, int shm_id) {
                     break;
                 default:
                     printf("invalid skill\n");
-                    //todo close
+                    init_room(room_id, shm_id);
                     exit(1);
             }
         }
 
         //send result
         char result_0[30], result_1[30];
-        int winner_0 = 0, winner_1 = 0;
+        int winner_0 = -1, winner_1 = -1;
         if(who_win == 0) {
             winner_0 = 1;
             winner_1 = 0;
@@ -131,6 +141,10 @@ void battle(int room_id, int shm_id) {
         else if(who_win == 1) {
             winner_0 = 0;
             winner_1 = 1;
+        }
+        else {
+            winner_0 = -1;
+            winner_1 = -1;
         }
         // result <enemy's skill> <enemy's lemon> <your skill> <your lemon> <winner>
         sprintf(result_0, "result %d %d %d %d %d", skill[1], room->players[1].num_of_lemon, skill[0], room->players[0].num_of_lemon, winner_0);
@@ -142,15 +156,26 @@ void battle(int room_id, int shm_id) {
 
         unlock_room(room_id);
 
+        printf("send %s\n",result_0);
         send(sockfd[0], result_0, 30, 0);
         send(sockfd[1], result_1, 30, 0);
 
-        //todo finish
+        if(who_win != -1) {
+            break;
+        }
 
-
-
-        //0.7s wait
-        usleep(700000);
+        // 1.4s になるようにwait
+        struct timeval end_tv;
+        gettimeofday(&end_tv, NULL);
+        long diff = (end_tv.tv_sec - start_tv.tv_sec) * 1000000 + (end_tv.tv_usec - start_tv.tv_usec);
+        long wait = 1400000 - diff;
+        if(wait > 0) {
+            usleep(wait);
+        }        
     }
     detach_rooms(rooms);
+    //todo close
+    init_room(room_id, shm_id);
+    exit(0);
+    
 }

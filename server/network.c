@@ -35,7 +35,7 @@ void receiver(int new_sockfd, int shm_id) {
     char buf[100];
     memset(buf, 0, sizeof(buf));
     int len = recv(new_sockfd, buf, BUFSIZ, 0);
-    if(len == 0) {
+    if(len == 0 || len == -1) {
         printf("connection closed:: receiver\n");
         exit(1);
     }
@@ -59,18 +59,19 @@ void receiver(int new_sockfd, int shm_id) {
     }
     else {
         printf("unknown label\n");
+        close(new_sockfd);
     }
 }
 
 void battle_receiver(int room_id, int player_num, int shm_id) {
-    // 0.7s
+    // 1.0s
     char buf[30];
     Room *rooms = attach_rooms(shm_id);
 
     while(1) {
         struct timeval tv;
-        tv.tv_sec = 0;
-        tv.tv_usec = 700000;
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
 
         fd_set read_fds;
         FD_ZERO(&read_fds);
@@ -79,6 +80,7 @@ void battle_receiver(int room_id, int player_num, int shm_id) {
         int ret = select(rooms[room_id].players[player_num].sockfd + 1, &read_fds, NULL, NULL, &tv);
         if(ret == -1) {
             perror("select");
+            init_room(room_id, shm_id);
             exit(1);
         }
         else if(ret == 0) {

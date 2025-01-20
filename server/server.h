@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <sys/shm.h>
+#include <sys/time.h>
 
 #define NUM_OF_ROOM 1000
 
@@ -67,7 +68,7 @@ void prepare_skills();
 void prepare_mutexes();
 void destroy_mutexes();
 void prepare_shared_memory(int *shm_id, Room **rooms);
-void init_room(Room *room);
+void init_room(int room_id, int shm_id);
 Room *attach_rooms(int shm_id);
 void detach_rooms(Room *rooms);
 Room *get_room_and_lock(Room *rooms, int room_id);

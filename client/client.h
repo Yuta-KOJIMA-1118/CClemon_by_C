@@ -45,7 +45,8 @@ void output_home();
 void output_with_friend_menu();
 void handle_with_friend_menu();
 void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int p_prev_skill, int turn, int selected_skill, int mistake);
-void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int y_prev_skill, int turn, int *selected_skill);
+void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int y_prev_skill, int *selected_skill);
+void output_result(int winner);
 
 int request_room_making(int sockfd);
 void waiting_battle(int sockfd, int room_id);

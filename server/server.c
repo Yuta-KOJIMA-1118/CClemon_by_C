@@ -33,16 +33,13 @@ int main() {
             case 0: // 子プロセス
                 printf("connect from %s: %d\n", inet_ntoa(clnt.sin_addr), ntohs(clnt.sin_port));
                 receiver(new_sockfd, shm_id);
-                //todo close
-                //close(new_sockfd);
                 exit(0);
 
             default: // 親プロセス
-                //todo close
-                //close(new_sockfd);
                 break;
         }
     }
+    printf("server end\n");
     close(sockfd);
     shmdt(rooms);
     shmctl(shm_id, IPC_RMID, NULL);

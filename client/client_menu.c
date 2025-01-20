@@ -57,18 +57,18 @@ void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
     
     switch(turn) {
         case 0:
-            printf("C\n");
-            printf("C\n");
+            printf("enemy: C\n");
+            printf("you:   C\n");
             break;
         
         case 1:
-            printf("C C\n");
-            printf("C C\n");
+            printf("enemy: C C\n");
+            printf("you:   C C\n");
             break;
 
         case 2:
-            printf("C C %s\n", skills[e_skill].name);
-            printf("C C %s\n", skills[y_skill].name);
+            printf("enemy: C C %s\n", skills[e_skill].name);
+            printf("you:   C C %s\n", skills[y_skill].name);
             break;
         
         default:
@@ -88,13 +88,19 @@ void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
     printf("3. change\n");
     printf("4. gun\n");
     printf("\n");
+
+    if(mistake) {
+        printf("you don't have enough lemon\n");
+    }
+    printf("selected skill: %s\n", skills[selected_skill].name);
 }
 
-void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int y_prev_skill, int turn, int *selected_skill) {
+void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int y_prev_skill, int *selected_skill) {
     const int interval_ms = 350;
     const int timeout_ms = 700;
     unsigned long start_time = GetTickCount();
     int mistake = 0;
+    int turn = 0;
 
     while((GetTickCount() - start_time) < timeout_ms) {
         int input_received = 0;
@@ -105,6 +111,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                 char c = _getch();
                 switch(c) {
                     case '0':
+                        printf("lemon\n");
                         *selected_skill = LEMON;
                         input_received = 1;
                         if(*selected_skill != LEMON) {
@@ -112,6 +119,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                         }
                         break;
                     case '1':
+                        printf("fire\n");
                         *selected_skill = FIRE;
                         input_received = 1;
                         if(y_lemon < skills[FIRE].energy && mistake == 0) {
@@ -124,6 +132,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                         }
                         break;
                     case '2':
+                        printf("barrier\n");
                         *selected_skill = BARRIER;
                         input_received = 1;
                         if(*selected_skill != BARRIER) {
@@ -131,6 +140,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                         }
                         break;
                     case '3':
+                        printf("change\n");
                         *selected_skill = CHANGE;
                         input_received = 1;
                         if(y_lemon < skills[CHANGE].energy && mistake == 0) {
@@ -144,6 +154,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                         break;
                     case '4':
                         *selected_skill = GUN;
+                        printf("gun\n");
                         input_received = 1;
                         if(y_lemon < skills[GUN].energy && mistake == 0) {
                             mistake = 1;
@@ -162,7 +173,19 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
             }
         }
         turn++;
+        if(turn == 2) {
+            break;
+        }
         output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
     }
 }
 
+void output_result(int winner) {
+    printf("result\n");
+    if(winner == 0) {
+        printf("you lose\n");
+    }
+    else{
+        printf("you win\n");
+    }
+}

@@ -11,12 +11,14 @@ void prepare_shared_memory(int *shm_id, Room **rooms) {
     }
 
     for(int i=0; i<NUM_OF_ROOM; i++) {
-        init_room(&(*rooms)[i]);
+        init_room(i, *shm_id);
     }
 }
 
-void init_room(Room *room) {
-    //todo mutexを実装する
+void init_room(int room_id, int shm_id) {
+    printf("init_room %d\n", room_id);
+    Room *rooms = attach_rooms(shm_id);
+    Room *room = get_room_and_lock(rooms, room_id);
     room->state = EMPTY;
     for(int i=0; i<2; i++) {
         room->players[i].name[0] = '\0';
@@ -26,6 +28,7 @@ void init_room(Room *room) {
         }
         room->players[i].sockfd = -1;
     }
+    unlock_room(room_id);
 }
 
 Room *attach_rooms(int shm_id) {
@@ -64,7 +67,6 @@ void destroy_mutexes() {
 
 Room *get_room_and_lock(Room *rooms, int room_id) {
     if (room_id < 0 || room_id >= NUM_OF_ROOM) {
-//todo 終了処理
         fprintf(stderr, "Invalid room_id: %d\n", room_id);
         exit(1);
     }
@@ -85,7 +87,6 @@ Room *get_room_and_lock(Room *rooms, int room_id) {
 
 void unlock_room(int room_id) {
     if (room_id < 0 || room_id >= NUM_OF_ROOM) {
-//todo 終了処理
         fprintf(stderr, "Invalid room_id: %d\n", room_id);
         exit(1);
     }

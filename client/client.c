@@ -12,15 +12,12 @@ int main() {
             char c = _getch();
             if(c == '1') {
                 printf("random matching\n");
-                break; //todo remove
             } else if(c == '2') {
                 printf("matching with friend\n");
                 output_with_friend_menu();
                 handle_with_friend_menu();
-                break; //todo remove
             } else if(c == '3') {
                 printf("matching with npc\n");
-                break; //todo remove
             } else if(c == '4') {
                 printf("exit\n");
                 finalize();
