@@ -23,6 +23,7 @@ void init_room(int room_id, int shm_id) {
     for(int i=0; i<2; i++) {
         room->players[i].name[0] = '\0';
         room->players[i].next_skill = 0; // lemon
+        room->players[i].num_of_lemon = 0;
         close(room->players[i].sockfd);
         room->players[i].sockfd = -2; // -2: no player, -1: player left
     }
