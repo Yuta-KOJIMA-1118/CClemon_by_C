@@ -14,7 +14,7 @@
 #include <sys/time.h>
 #include <poll.h>
 
-#define NUM_OF_ROOM 1000
+#define NUM_OF_ROOM 100000 // 合計100000部屋までしか遊べないが，そこまで遊ぶ人はいないだろう...
 
 #define LEMON 0
 #define FIRE 1

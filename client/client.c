@@ -11,13 +11,15 @@ int main() {
         if(_kbhit()) {
             char c = _getch();
             if(c == '1') {
-                printf("random matching\n");
+                printf("未実装\n");
+                printf("mathing with friend のみ実装\n");
             } else if(c == '2') {
                 printf("matching with friend\n");
                 output_with_friend_menu();
                 handle_with_friend_menu();
             } else if(c == '3') {
-                printf("matching with npc\n");
+                printf("未実装\n");
+                printf("mathing with friend のみ実装\n");
             } else if(c == '4') {
                 printf("exit\n");
                 finalize();

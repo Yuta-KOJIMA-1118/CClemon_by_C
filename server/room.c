@@ -116,10 +116,17 @@ void check_room_sockfd(Room *rooms, int room_id, int shm_id) {
             pfd.fd = room->players[i].sockfd;
             pfd.events = POLLIN | POLLPRI;
             
-            int ret = poll(&pfd, 1, 0); // 0: timeout, 1: data available, -1: error
+            int ret = poll(&pfd, 1, 0);
             if(ret == -1 || pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {
                 flag = 1;
-                break;
+            }
+
+            if(pfd.revents & POLLIN) {
+                char buf[30];
+                int len = recv(room->players[i].sockfd, buf, 30, MSG_PEEK);
+                if(len == 0 || len == -1) {
+                    flag = 1;
+                }
             }
         }
     }

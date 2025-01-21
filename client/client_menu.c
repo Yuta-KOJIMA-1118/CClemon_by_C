@@ -82,11 +82,11 @@ void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
     printf("\n");
 
     printf("select skill\n");
-    printf("0. lemon\n");
-    printf("1. fire\n");
-    printf("2. barrier\n");
-    printf("3. change\n");
-    printf("4. gun\n");
+    printf("1. lemon\n");
+    printf("2. fire\n");
+    printf("3. barrier\n");
+    printf("4. change\n");
+    printf("5. gun\n");
     printf("\n");
 
     if(mistake) {
@@ -110,7 +110,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
             if(_kbhit()) {
                 char c = _getch();
                 switch(c) {
-                    case '0':
+                    case '1':
                         printf("lemon\n");
                         *selected_skill = LEMON;
                         input_received = 1;
@@ -118,7 +118,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                             output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
                         }
                         break;
-                    case '1':
+                    case '2':
                         printf("fire\n");
                         *selected_skill = FIRE;
                         input_received = 1;
@@ -131,7 +131,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                             output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
                         }
                         break;
-                    case '2':
+                    case '3':
                         printf("barrier\n");
                         *selected_skill = BARRIER;
                         input_received = 1;
@@ -139,7 +139,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                             output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
                         }
                         break;
-                    case '3':
+                    case '4':
                         printf("change\n");
                         *selected_skill = CHANGE;
                         input_received = 1;
@@ -152,7 +152,7 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
                             output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, turn, *selected_skill, mistake);
                         }
                         break;
-                    case '4':
+                    case '5':
                         *selected_skill = GUN;
                         printf("gun\n");
                         input_received = 1;
