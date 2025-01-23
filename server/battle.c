@@ -1,7 +1,7 @@
 #include "server.h"
 
-void battle(int room_id, int shm_id) {
-    Room *rooms = attach_rooms(shm_id);
+void battle(int room_id) {
+    Room *rooms = attach_rooms();
     Room *room = get_room_and_lock(rooms, room_id);
     int sockfd[2];
     sockfd[0] = room->players[0].sockfd;
@@ -19,7 +19,8 @@ void battle(int room_id, int shm_id) {
     if(len_1 == -1 || len_2 == -1 || len_1 == 0 || len_2 == 0) {
         printf("sockfd[0]: %d, sockfd[1]: %d\n", sockfd[0], sockfd[1]);
         perror("recv");
-        init_room(room_id, shm_id);
+        unlock_room(room_id);
+        init_room(room_id);
         exit(1);
     }
     printf("received in battle: %s, %s\n", buf_1, buf_2);
@@ -35,7 +36,8 @@ void battle(int room_id, int shm_id) {
 
     if(strcmp(buf_1, "start") != 0 || strcmp(buf_2, "start") != 0) {
         printf("invalid start signal\n");
-        init_room(room_id, shm_id);
+        unlock_room(room_id);
+        init_room(room_id);
         exit(1);
     }
 
@@ -51,10 +53,8 @@ void battle(int room_id, int shm_id) {
         Battle battle[2];
         battle[0].room_id = room_id;
         battle[0].player_num = 0;
-        battle[0].shm_id = shm_id;
         battle[1].room_id = room_id;
         battle[1].player_num = 1;
-        battle[1].shm_id = shm_id;
         
         //現在時刻
         struct timeval start_tv;
@@ -73,19 +73,22 @@ void battle(int room_id, int shm_id) {
         int len_2 = send(sockfd[1], "turn start", 30, 0);
         if(len_1 == -1 || len_2 == -1) {
             perror("send");
-            init_room(room_id, shm_id);
+            unlock_room(room_id);
+            init_room(room_id);
             exit(1);
         }
         if(len_1 == 0 || len_2 == 0) {
             printf("connection closed:: battle\n");
-            init_room(room_id, shm_id);
+            unlock_room(room_id);
+            init_room(room_id);
             exit(1);
         }
 
         for(int i=0; i<2; i++) {
             if(pthread_join(thread[i], NULL) != 0) {
                 perror("pthread_join");
-                init_room(room_id, shm_id);
+                unlock_room(room_id);
+                init_room(room_id);
                 exit(1);
             }
         }
@@ -137,7 +140,8 @@ void battle(int room_id, int shm_id) {
                     break;
                 default:
                     printf("invalid skill\n");
-                    init_room(room_id, shm_id);
+                    unlock_room(room_id);
+                    init_room(room_id);
                     exit(1);
             }
         }
@@ -161,7 +165,7 @@ void battle(int room_id, int shm_id) {
         sprintf(result_0, "result %d %d %d %d %d", skill[1], room->players[1].num_of_lemon, skill[0], room->players[0].num_of_lemon, winner_0);
         sprintf(result_1, "result %d %d %d %d %d", skill[0], room->players[0].num_of_lemon, skill[1], room->players[1].num_of_lemon, winner_1);
         
-        // reset next_skill
+        // next_skillを初期化
         room->players[0].next_skill = 0;
         room->players[1].next_skill = 0;
 
@@ -172,12 +176,12 @@ void battle(int room_id, int shm_id) {
         len_2 = send(sockfd[1], result_1, 30, 0);
         if(len_1 == -1 || len_2 == -1) {
             perror("send");
-            init_room(room_id, shm_id);
+            init_room(room_id);
             exit(1);
         }
         if(len_1 == 0 || len_2 == 0) {
             printf("connection closed:: battle\n");
-            init_room(room_id, shm_id);
+            init_room(room_id);
             exit(1);
         }
 
@@ -195,7 +199,6 @@ void battle(int room_id, int shm_id) {
         }        
     }
     detach_rooms(rooms);
-    //todo close
-    init_room(room_id, shm_id);
+    init_room(room_id);
     exit(0);
 }

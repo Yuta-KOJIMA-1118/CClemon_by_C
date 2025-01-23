@@ -58,30 +58,32 @@ typedef struct Room {
 typedef struct Battle {
     int room_id;
     int player_num;
-    int shm_id;
 } Battle;
 
 extern Skill skills[5];
-extern pthread_mutex_t room_mutexes[NUM_OF_ROOM];
+extern int shm_id;
+extern int mutex_shm_id;
 
 // Function Prototypes
 void prepare_skills();
-void prepare_mutexes();
+void prepare_mutexes(pthread_mutex_t **room_mutexes);
 void destroy_mutexes();
-void prepare_shared_memory(int *shm_id, Room **rooms);
-void init_room(int room_id, int shm_id);
-Room *attach_rooms(int shm_id);
+pthread_mutex_t *attach_mutexes();
+void detach_mutexes(pthread_mutex_t *room_mutexes);
+void prepare_shared_memory(Room **rooms);
+void init_room(int room_id);
+Room *attach_rooms();
 void detach_rooms(Room *rooms);
 Room *get_room_and_lock(Room *rooms, int room_id);
 RoomState get_room_state_no_lock(Room *rooms, int room_id);
-void check_room_sockfd(Room *rooms, int room_id, int shm_id);
+void check_room_sockfd(Room *rooms, int room_id);
 void unlock_room(int room_id);
 int prepare_socket(socklen_t *sin_siz);
-void receiver(int new_sockfd, int shm_id);
-int room_making(int shm_id, int new_sockfd);
-int room_searching(int shm_id, int room_id, int new_sockfd);
-void battle_receiver(int room_id, int player_num, int shm_id);
+void receiver(int new_sockfd);
+int room_making(int new_sockfd);
+int room_searching(int room_id, int new_sockfd);
+void battle_receiver(int room_id, int player_num);
 void *pthread_battle_receiver(void *arg);
-void battle(int room_id, int shm_id);
+void battle(int room_id);
 
 #endif // SERVER_H

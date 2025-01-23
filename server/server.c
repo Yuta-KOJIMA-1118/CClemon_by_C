@@ -2,15 +2,18 @@
 
 // グローバル変数
 Skill skills[5];
-pthread_mutex_t room_mutexes[NUM_OF_ROOM];
+int shm_id;
+int mutex_shm_id;
 
 
 int main() {
-    prepare_skills();
+    pthread_mutex_t *room_mutexes;
+    prepare_mutexes(&room_mutexes);
 
-    int shm_id;
+
+    prepare_skills();
     Room *rooms;
-    prepare_shared_memory(&shm_id, &rooms);
+    prepare_shared_memory(&rooms);
 
     int sockfd;
     socklen_t sin_siz;
@@ -32,7 +35,7 @@ int main() {
 
             case 0: // 子プロセス
                 printf("connect from %s: %d\n", inet_ntoa(clnt.sin_addr), ntohs(clnt.sin_port));
-                receiver(new_sockfd, shm_id);
+                receiver(new_sockfd);
                 exit(0);
 
             default: // 親プロセス
@@ -43,6 +46,6 @@ int main() {
     close(sockfd);
     shmdt(rooms);
     shmctl(shm_id, IPC_RMID, NULL);
-    destroy_mutexes();
+    destroy_mutexes(room_mutexes);
     return 0;
 }
