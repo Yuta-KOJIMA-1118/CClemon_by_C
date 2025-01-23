@@ -107,7 +107,6 @@ void destroy_mutexes() {
 }
 
 Room *get_room_and_lock(Room *rooms, int room_id) {
-    printf("get_room_and_lock %d\n", room_id);
     if (room_id < 0 || room_id >= NUM_OF_ROOM) {
         fprintf(stderr, "Invalid room_id: %d\n", room_id);
         exit(1);
@@ -117,16 +116,13 @@ Room *get_room_and_lock(Room *rooms, int room_id) {
     pthread_mutex_t *room_mutexes = attach_mutexes();
     while (1) {
         int lock_status = pthread_mutex_lock(&room_mutexes[room_id]);
-
         if (lock_status == 0) {
-            printf("lock %d\n", room_id);
             break;
         }
     }
     detach_mutexes(room_mutexes);
 
     // 該当する Room を返す
-    printf("get_room_and_lock end %d\n", room_id);
     return &rooms[room_id];
 }
 
@@ -142,7 +138,6 @@ void unlock_room(int room_id) {
         perror("pthread_mutex_unlock");
         exit(1);
     }
-    printf("unlock %d\n", room_id);
     detach_mutexes(room_mutexes);
 }
 
@@ -156,7 +151,7 @@ RoomState get_room_state_no_lock(Room *rooms, int room_id) {
     return room->state;
 }
 
-void check_room_sockfd(Room *rooms, int room_id) {
+int check_room_sockfd(Room *rooms, int room_id) {
     printf("check_room_sockfd %d\n", room_id);
     int flag = 0;
     Room *room = get_room_and_lock(rooms, room_id);
@@ -165,7 +160,7 @@ void check_room_sockfd(Room *rooms, int room_id) {
     sockfd[1] = room->players[1].sockfd;
     unlock_room(room_id);
     for(int i=0; i<2; i++) {
-        // 実際に通信をしてsockfdが有効かを確認
+        // sockfdの状態が読み込み可能かを調べる
         if(sockfd[i] != -2) {
             struct pollfd pfd;
             pfd.fd = sockfd[i];
@@ -188,8 +183,10 @@ void check_room_sockfd(Room *rooms, int room_id) {
 
     if(flag == 1) {
         init_room(room_id);
+        return 1;
     }
     printf("check_room_sockfd end\n");
+    return 0;
 
 }
 

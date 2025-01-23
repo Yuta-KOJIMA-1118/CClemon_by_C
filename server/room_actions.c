@@ -32,6 +32,11 @@ int room_making(int new_sockfd) {
 int room_searching(int room_id, int new_sockfd) {
     printf("room_searching %d\n", room_id);
     Room *rooms = attach_rooms();
+    if(check_room_sockfd(rooms, room_id) == 1) {
+        detach_rooms(rooms);
+        send(new_sockfd, "failed", 6, 0);
+        return -1;
+    } // 閉じられていた場合は初期化
     Room *room = get_room_and_lock(rooms, room_id);
     if(room->state == WAITING_FRIEND) {
         room->state = PLAYING;

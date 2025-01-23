@@ -2,6 +2,10 @@
 CC = gcc
 
 # コンパイラのオプション
+# Wall: 警告を表示
+# Wextra: 追加の警告を表示
+# g: デバッグ情報を含める(gdbでデバッグ可能)
+# pthread: pthreadライブラリをリンク
 CFLAGS = -Wall -Wextra -g -pthread
 
 # 出力ファイル名

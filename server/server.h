@@ -6,13 +6,13 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <sys/shm.h>
 #include <sys/time.h>
 #include <poll.h>
+//#include <fcntl.h> // network.cのselectを使用しないbattle_receiverで使用
+//#include <errno.h> // network.cのselectを使用しないbattle_receiverで使用
 
 #define NUM_OF_ROOM 100000 // 合計100000部屋までしか遊べないが，そこまで遊ぶ人はいないだろう...
 
@@ -37,7 +37,7 @@ typedef enum SkillType {
 } SkillType;
 
 typedef struct Skill {
-    char name[10];
+    char name[10]; // todo delete
     int priority; //todo delete
     int energy;
     SkillType type;
@@ -76,7 +76,7 @@ Room *attach_rooms();
 void detach_rooms(Room *rooms);
 Room *get_room_and_lock(Room *rooms, int room_id);
 RoomState get_room_state_no_lock(Room *rooms, int room_id);
-void check_room_sockfd(Room *rooms, int room_id);
+int check_room_sockfd(Room *rooms, int room_id);
 void unlock_room(int room_id);
 int prepare_socket(socklen_t *sin_siz);
 void receiver(int new_sockfd);

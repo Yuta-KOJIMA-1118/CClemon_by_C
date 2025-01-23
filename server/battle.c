@@ -27,7 +27,8 @@ void battle(int room_id) {
 
     if(len_1 == 0 || len_2 == 0) {
         printf("connection closed:: battle\n");
-        //todo close
+        unlock_room(room_id);
+        init_room(room_id);
         exit(1);
     }
 
@@ -42,9 +43,9 @@ void battle(int room_id) {
     }
 
     // 1s wait
-    printf("0.5s wait start\n");
-    sleep(1);
-    printf("0.5s wait end\n");
+    //printf("1s wait start\n");
+    //sleep(1);
+    //printf("1s wait end\n");
 
     while(1) {
         // 1ターン1.4s
@@ -68,8 +69,8 @@ void battle(int room_id) {
         }
 
         // turn start signal
-        printf("turn start signal\n");
-        int len_1 = send(sockfd[0], "turn start", 30, 0);
+        printf("turn start signal\n"); //t = 0s
+        int len_1 = send(sockfd[0], "turn start", 30, 0); 
         int len_2 = send(sockfd[1], "turn start", 30, 0);
         if(len_1 == -1 || len_2 == -1) {
             perror("send");

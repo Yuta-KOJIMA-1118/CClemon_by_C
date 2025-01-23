@@ -12,6 +12,46 @@ void output_home() {
     printf("\n");
 }
 
+void handle_home() {
+    int flag[6] = {0};
+    while(1) {
+        if(_kbhit()) {
+            char c = _getch();
+            if(c == '1') {
+                if(flag[1] == 0) {
+                    flag[1] = 1;
+                    printf("random matching\n");
+                    printf("未実装\n");
+                }
+            }
+            else if(c == '2') {
+                printf("matching with friend\n");
+                output_with_friend_menu();
+                handle_with_friend_menu();
+                return;
+            }
+            else if(c == '3') {
+                if(flag[3] == 0) {
+                    flag[3] = 1;
+                    printf("matching with npc\n");
+                    printf("未実装\n");
+                }
+            }
+            else if(c == '4') {
+                printf("exit\n");
+                finalize();
+            }
+            else {
+                if(flag[5] == 0) {
+                    flag[5] = 1;
+                    printf("invalid input\n");
+                    printf("please type 1, 2, 3, 4\n");
+                }
+            }
+        }
+    }
+}
+
 void output_with_friend_menu() {
     printf("type 0 to room making\n");
     printf("type negative number to exit\n");
@@ -45,6 +85,7 @@ void handle_with_friend_menu() {
             return;
         }
     }
+    return;
 }
 
 void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int e_prev_skill, int p_prev_skill, int turn, int selected_skill, int mistake) {
@@ -53,8 +94,14 @@ void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
     printf("\n");
 
     printf("enemy's lemon: %d\n", e_lemon);
-    printf("enemy's prev skill: %s\n", skills[e_prev_skill].name);
-    
+    if(e_prev_skill != -1) {
+        printf("enemy's prev skill: %s\n", skills[e_prev_skill].name);
+    }
+    else {
+        printf("\n");
+    }
+    printf("\n");
+
     switch(turn) {
         case 0:
             printf("enemy: C\n");
@@ -78,7 +125,13 @@ void output_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
 
     printf("\n");
     printf("your lemon: %d\n", y_lemon);
-    printf("your prev skill: %s\n", skills[p_prev_skill].name);
+
+    if(p_prev_skill == -1) {
+        printf("\n");
+    }
+    else {
+        printf("your prev skill: %s\n", skills[p_prev_skill].name);
+    }
     printf("\n");
 
     printf("select skill\n");
@@ -105,7 +158,6 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
     while((GetTickCount() - start_time) < timeout_ms) {
         int input_received = 0;
         int cycle_start_time = GetTickCount();
-        // todo check num of lemon
         while((GetTickCount() - cycle_start_time) < interval_ms) {
             if(_kbhit()) {
                 char c = _getch();
@@ -181,11 +233,16 @@ void handle_battle_menu(int e_lemon, int y_lemon, int e_skill, int y_skill, int 
 }
 
 void output_result(int winner) {
-    printf("result\n");
+    printf("\nresult\n");
     if(winner == 0) {
         printf("you lose\n");
     }
     else{
         printf("you win\n");
     }
+    printf("\n");
+    printf("type any key to return to home\n");
+    _getch();
 }
+
+

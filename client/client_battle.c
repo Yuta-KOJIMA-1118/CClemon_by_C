@@ -33,7 +33,8 @@ void start_battle(int sockfd) {
     while(1) {
         int len;
         char buf[30];
-        len = recv(sockfd, buf, 30, 0); // turn start signal
+        selected_skill = 0;
+        len = recv(sockfd, buf, 30, 0); // turn start signal, t = 0s
         if(len == 0) {
             printf("connection closed:: start_battle\n");
             finalize();
@@ -44,7 +45,7 @@ void start_battle(int sockfd) {
             finalize();
         }
     
-        pthread_t thread;
+        pthread_t thread; // スレッドに分ける必要なかった気がするが，作ってしまったので放置
         if(pthread_create(&thread, NULL, pthread_battle_receiver, (void *)&sockfd) != 0) {
             perror("pthread_create");
             exit(1);
@@ -56,7 +57,7 @@ void start_battle(int sockfd) {
 
         char buf_2[30];
         sprintf(buf_2, "skill %d", selected_skill);
-        len = send(sockfd, buf_2, 30, 0);
+        len = send(sockfd, buf_2, 30, 0); // t = 0.7s
         if(len == -1) {
             perror("send");
             finalize();
@@ -72,7 +73,6 @@ void start_battle(int sockfd) {
             exit(1);
         }
 
-        //todo バトル処理
         int winner = data->winner;
         e_lemon = data->e_lemon;
         y_lemon = data->y_lemon;
@@ -81,8 +81,6 @@ void start_battle(int sockfd) {
 
         output_battle_menu(e_lemon, y_lemon, e_skill, y_skill, e_prev_skill, y_prev_skill, 2, selected_skill, 0);
 
-        selected_skill = 0;
-
         //printf("in_start_battle: e_skill: %d, e_lemon: %d, y_skill: %d, y_lemon: %d, winner: %d\n", e_skill, e_lemon, y_skill, y_lemon, winner);
         
         if(winner != -1) {
@@ -90,8 +88,6 @@ void start_battle(int sockfd) {
             break;
         }
     }
-
-
-
-
+    closesocket(sockfd);
+    return;
 }

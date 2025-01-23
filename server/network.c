@@ -85,10 +85,8 @@ void battle_receiver(int room_id, int player_num) {
         }
         else if(ret == 0) {
             printf("timeout\n");
-            printf("skill lock 1\n");
             Room *room = get_room_and_lock(rooms, room_id);
             room->players[player_num].next_skill = 0; // lemon
-            printf("skill unlock 1\n");
             unlock_room(room_id);
             return;
         }
@@ -107,10 +105,8 @@ void battle_receiver(int room_id, int player_num) {
 
             if(strcmp(label, "skill") == 0) {
                 int skill_id = atoi(data);
-                printf("skill lock 2\n");
                 Room *room = get_room_and_lock(rooms, room_id);
                 room->players[player_num].next_skill = skill_id;
-                printf("skill unlock 2\n");
                 unlock_room(room_id);
             }
             else {
@@ -121,6 +117,64 @@ void battle_receiver(int room_id, int player_num) {
 
     }
 }
+
+
+/*
+void battle_receiver(int room_id, int player_num) {
+    char buf[30];
+    Room *rooms = attach_rooms();
+
+    // ソケットを非ブロッキングモードに設定
+    int sockfd = rooms[room_id].players[player_num].sockfd;
+    int flags = fcntl(sockfd, F_GETFL, 0);
+    fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+
+    while (1) {
+        int len = recv(sockfd, buf, 30, 0);
+
+        if (len > 0) { // データ受信成功
+            buf[len] = '\0';
+            printf("received in battle_receiver: %s\n", buf);
+            char *label = strtok(buf, " ");
+            char *data = strtok(NULL, " ");
+
+            if (strcmp(label, "skill") == 0) {
+                int skill_id = atoi(data);
+                Room *room = get_room_and_lock(rooms, room_id);
+                room->players[player_num].next_skill = skill_id;
+                unlock_room(room_id);
+            } else {
+                printf("unknown label\n");
+            }
+            break;
+        } else if (len == 0) { // 接続が切断された
+            printf("connection closed:: battle_receiver\n");
+            init_room(room_id);
+            exit(1);
+        } else {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) { // データがまだ到着していない場合
+                //printf("waiting for data...\n");
+                usleep(100000); // 0.1秒待機して再試行
+            } else { // その他のエラー
+                perror("recv");
+                init_room(room_id);
+                exit(1);
+            }
+        }
+
+        // タイムアウト判定
+        static int elapsed_time = 0;
+        elapsed_time += 100;
+        if (elapsed_time >= 1000) {
+            printf("timeout\n");
+            Room *room = get_room_and_lock(rooms, room_id);
+            room->players[player_num].next_skill = 0; // lemon
+            unlock_room(room_id);
+            return;
+        }
+    }
+}
+*/
 
 void *pthread_battle_receiver(void *arg) {
     Battle *battle = (Battle *)arg;

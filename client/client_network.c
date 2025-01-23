@@ -42,6 +42,7 @@ void waiting_battle(int sockfd, int room_id) {
         if(strcmp(buf, "start") == 0) {
             printf("battle start\n");
             start_battle(sockfd);
+            return;
         }
         else if(strcmp(buf, "failed") == 0) {
             printf("failed to start battle\n");
@@ -123,7 +124,7 @@ void *pthread_battle_receiver(void *arg) {
     }
 
     buf[len] = '\0';
-    printf("received in pthread_battle_receiver: %s\n", buf);
+    //printf("received in pthread_battle_receiver: %s\n", buf);
     char *label = strtok(buf, " ");
     char *e_skill = strtok(NULL, " ");
     char *e_lemon = strtok(NULL, " ");
@@ -138,7 +139,7 @@ void *pthread_battle_receiver(void *arg) {
     data->y_lemon = atoi(y_lemon);
     data->winner = atoi(winner);
 
-    printf("e_skill: %d, e_lemon: %d, y_skill: %d, y_lemon: %d, winner: %d\n", data->e_skill, data->e_lemon, data->y_skill, data->y_lemon, data->winner);
+    //printf("e_skill: %d, e_lemon: %d, y_skill: %d, y_lemon: %d, winner: %d\n", data->e_skill, data->e_lemon, data->y_skill, data->y_lemon, data->winner);
 
     return (void *)data;
 }
